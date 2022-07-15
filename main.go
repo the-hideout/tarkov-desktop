@@ -14,6 +14,18 @@ import (
 	"github.com/hpcloud/tail"
 )
 
+var MapName string
+var QueueTime int
+var EventNumber int
+
+func PostResults() {
+	EventNumber++
+	fmt.Println("[#] Event number:", EventNumber)
+	fmt.Println("  🗺️ Map:", MapName)
+	fmt.Println("  🕒 Sec:", QueueTime)
+	fmt.Println()
+}
+
 // Readln returns a single line (without the ending \n)
 // from the input buffered reader.
 // An error is returned iff there is an error with the
@@ -39,8 +51,14 @@ func Map(line string) string {
 	if map_name == "factory4_day" {
 		map_name = "factory"
 	}
+	if map_name == "RezervBase" {
+		map_name = "reserve"
+	}
+	if map_name == "bigmap" {
+		map_name = "customs"
+	}
 
-	fmt.Println("[+] Map: " + map_name)
+	map_name = strings.ToLower(map_name)
 
 	return map_name
 }
@@ -53,8 +71,6 @@ func Queue(line string) int {
 
 	queue_time_float, _ := strconv.ParseFloat(queue_time_raw, 64)
 	queue_time := int(queue_time_float)
-
-	fmt.Println("[+] Queue Time: " + strconv.Itoa(queue_time))
 
 	return queue_time
 }
@@ -127,11 +143,12 @@ func main() {
 	// Tail the application log file
 	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true})
 	for line := range t.Lines {
-		if strings.Contains(line.Text, "RaidMode: Online") {
-			Map(line.Text)
-		}
 		if strings.Contains(line.Text, "GamePrepared") {
-			Queue(line.Text)
+			QueueTime = Queue(line.Text)
+		}
+		if strings.Contains(line.Text, "RaidMode: Online") {
+			MapName = Map(line.Text)
+			PostResults()
 		}
 	}
 
