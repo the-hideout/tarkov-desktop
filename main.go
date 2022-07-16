@@ -57,6 +57,9 @@ func Map(line string) string {
 	if map_name == "bigmap" {
 		map_name = "customs"
 	}
+	if map_name == "factory4_night" {
+		map_name = "night factory"
+	}
 
 	map_name = strings.ToLower(map_name)
 
