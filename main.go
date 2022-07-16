@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/denisbrodbeck/machineid"
 	"github.com/hpcloud/tail"
 	//"github.com/mdp/qrterminal/v3"
@@ -76,11 +77,11 @@ func Queue(line string) int {
 
 func main() {
 	id, err := machineid.ProtectedID("tarkov")
-  	if err != nil {
-    	log.Fatal(err)
-  	}
-  	fmt.Println(id)
-	
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(id)
+
 	//qrterminal.Generate(id, qrterminal.L, os.Stdout)
 
 	// Get the current user's home directory
@@ -146,13 +147,11 @@ func main() {
 	fmt.Println("[#] Starting queue-scanner\n")
 	time.Sleep(2 * time.Second)
 
-	app_log_file = "/Users/austinhodak/Downloads/logs/good.log"
-	
 	var QueueTime int
 	// Tail the application log file
 	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true})
 	for line := range t.Lines {
-		
+
 		if strings.Contains(line.Text, "GamePrepared") {
 			QueueTime = Queue(line.Text)
 		}
