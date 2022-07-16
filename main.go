@@ -21,8 +21,8 @@ var EventNumber int
 func PostResults() {
 	EventNumber++
 	fmt.Println("[#] Event number:", EventNumber)
-	fmt.Println("  🗺️ Map:", MapName)
-	fmt.Println("  🕒 Sec:", QueueTime)
+	fmt.Println("  [i] Map:", MapName)
+	fmt.Println("  [i] Sec:", QueueTime)
 	fmt.Println()
 }
 
