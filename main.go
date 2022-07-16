@@ -10,15 +10,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"github.com/denisbrodbeck/machineid"
 	"github.com/hpcloud/tail"
+	//"github.com/mdp/qrterminal/v3"
 )
 
-var MapName string
-var QueueTime int
 var EventNumber int
 
-func PostResults() {
+func PostResults(MapName string, QueueTime int) {
 	EventNumber++
 	fmt.Println("[#] Event number:", EventNumber)
 	fmt.Println("  [i] Map:", MapName)
@@ -76,6 +75,14 @@ func Queue(line string) int {
 }
 
 func main() {
+	id, err := machineid.ProtectedID("tarkov")
+  	if err != nil {
+    	log.Fatal(err)
+  	}
+  	fmt.Println(id)
+	
+	//qrterminal.Generate(id, qrterminal.L, os.Stdout)
+
 	// Get the current user's home directory
 	currentUser, err := user.Current()
 	if err != nil {
@@ -92,7 +99,7 @@ func main() {
 	f, err := os.Open(player_log_file)
 	if err != nil {
 		fmt.Printf("error opening file Player.log: %v\n", err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	r := bufio.NewReader(f)
 	s, e := Readln(r)
@@ -112,7 +119,7 @@ func main() {
 	// Scan the log directory for all log folders
 	files, err := ioutil.ReadDir(log_dir)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 	}
 
 	// Grab the last log folder in the list which will be the latest
@@ -121,11 +128,10 @@ func main() {
 		latest_log_dir = log_dir + "\\" + f.Name()
 	}
 	fmt.Println("[#] Latest Log Directory: " + latest_log_dir)
-
 	// Loop through all files in the log directory
 	log_files, err := ioutil.ReadDir(latest_log_dir)
 	if err != nil {
-		log.Fatal(err)
+		//log.Fatal(err)
 	}
 
 	// Grab the last log folder in the list which will be the latest
@@ -140,15 +146,19 @@ func main() {
 	fmt.Println("[#] Starting queue-scanner\n")
 	time.Sleep(2 * time.Second)
 
+	app_log_file = "/Users/austinhodak/Downloads/logs/good.log"
+	
+	var QueueTime int
 	// Tail the application log file
 	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true})
 	for line := range t.Lines {
+		
 		if strings.Contains(line.Text, "GamePrepared") {
 			QueueTime = Queue(line.Text)
 		}
 		if strings.Contains(line.Text, "RaidMode: Online") {
-			MapName = Map(line.Text)
-			PostResults()
+			//MapName = Map(line.Text)
+			PostResults(Map(line.Text), QueueTime)
 		}
 	}
 
