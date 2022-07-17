@@ -97,6 +97,14 @@ func Map(line string) string {
 	return map_name
 }
 
+func (a *App) DeviceID() string {
+	id, err := machineid.ProtectedID("tarkov")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fmt.Sprintf(id)
+}
+
 func Queue(line string) int {
 	var queue_time_raw string
 
@@ -115,12 +123,6 @@ func (a *App) QueueScanner() {
 	time.Sleep(time.Second * 1)
 	Exit = false
 	QueueLogs = ""
-
-	id, err := machineid.ProtectedID("tarkov")
-	if err != nil {
-		log.Fatal(err)
-	}
-	Output(id)
 
 	//qrterminal.Generate(id, qrterminal.L, os.Stdout)
 
