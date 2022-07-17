@@ -8,7 +8,11 @@ This utility runs alongside your Tarkov game. It scans and reads log files emitt
 
 ## Usage 💻
 
-This is a community tool that is run by anyone and everyone who wants to help crowdsource EFT data for queue times. By running this tool, you are helping to make queue data available to the community
+> This is an extremely alpha utility
+
+The current primary usage of this application is to run alongside your EFT game to collect data about queue times. It does not interact with the game in anyway and is totally safe to run. It simply looks at the lines written to your `application.log` files for the EFT game and parses the total queue time for a map. This data is then automatically submitted to our open source API. By running this application, you are directly helping to crowdsource queue data 🎉!
+
+You can also link the QR code seen in the application to [the-hideout](https://play.google.com/store/apps/details?id=com.austinhodak.thehideout&hl=en_US&gl=US) (Android app) and get real-time notifications on your phone when you are about to load into a raid!
 
 ## How it Works 🔨
 
