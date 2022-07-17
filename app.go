@@ -70,7 +70,7 @@ func PostResults(MapName string, QueueTime int) {
 	message += fmt.Sprintf("  🕒 Sec: %d\n\n", QueueTime)
 
 	jsonStr := fmt.Sprintf("{\"map\":\"%s\",\"time\":%d}", MapName, QueueTime)
-	resp, _ := requests.PostJson("http://localhost:4000/api/queue", jsonStr)
+	resp, _ := requests.PostJson("https://manager.tarkov.dev/api/queue", jsonStr)
 	println(resp.Text())
 
 	Output(message)
