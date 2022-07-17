@@ -1,0 +1,12 @@
+LocationLoaded - Matching started.
+MatchingCompleted - Raid found, loading loot started.
+GamePrepared - ^^^
+GameCreated - ^^^
+GamePooled
+GameRunned
+GameSpawn
+PlayerSpawnEvent
+GameSpawned - Game is ready, countdown will start soon.
+GameStarting - Red Countdown Started
+GameStarted - Countdown Finished, Raid has begun
+SelectProfile - Game launched?

@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,11 +13,13 @@ import (
 	"time"
 
 	"github.com/denisbrodbeck/machineid"
+	"github.com/go-resty/resty/v2"
 	"github.com/hpcloud/tail"
-	//"github.com/mdp/qrterminal/v3"
+	"github.com/mdp/qrterminal/v3"
 )
 
 var EventNumber int
+var HardwareID string
 
 func PostResults(MapName string, QueueTime int) {
 	EventNumber++
@@ -81,8 +84,9 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(id)
+	HardwareID = id
 
-	//qrterminal.Generate(id, qrterminal.L, os.Stdout)
+	qrterminal.Generate(id, qrterminal.L, os.Stdout)
 
 	// Get the current user's home directory
 	currentUser, err := user.Current()
@@ -147,11 +151,12 @@ func main() {
 	fmt.Println("[#] Starting queue-scanner\n")
 	time.Sleep(2 * time.Second)
 
+	//app_log_file = "/Users/austinhodak/Downloads/logs/new.log"
+
 	var QueueTime int
 	// Tail the application log file
-	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true})
+	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Location: &tail.SeekInfo{Offset: 0, Whence: io.SeekEnd}})
 	for line := range t.Lines {
-
 		if strings.Contains(line.Text, "GamePrepared") {
 			QueueTime = Queue(line.Text)
 		}
@@ -159,7 +164,30 @@ func main() {
 			//MapName = Map(line.Text)
 			PostResults(Map(line.Text), QueueTime)
 		}
+		if strings.Contains(line.Text, "GameStarting") {
+			PostTheHideout("GameStarting")
+		}
+		if strings.Contains(line.Text, "GameStarted") {
+			PostTheHideout("GameStarted")
+		}
+		if strings.Contains(line.Text, "MatchingCompleted") {
+			PostTheHideout("MatchingCompleted")
+		}
 	}
 
 	fmt.Println("[#] Exiting queue-scanner")
+}
+
+func PostTheHideout(event string) {
+	fmt.Printf(event)
+	client := resty.New()
+	_, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(fmt.Sprintf(`{"event": "%s", "hardwareID": "%s"}`, event, HardwareID)).
+		SetAuthToken("1cki00ohk2hsn11jrqg0zckfgq").
+		Post("https://thehideout.io/api/v1/game")
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
