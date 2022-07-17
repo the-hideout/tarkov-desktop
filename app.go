@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asmcos/requests"
 	"github.com/denisbrodbeck/machineid"
 	"github.com/hpcloud/tail"
 	//"github.com/mdp/qrterminal/v3"
@@ -23,6 +24,7 @@ var EventNumber int
 var QueueLogs = ""
 var Exit = true
 var QueueScannerRunning = false
+var RestartNow = false
 
 // App struct
 type App struct {
@@ -43,18 +45,17 @@ func (a *App) startup(ctx context.Context) {
 // Stop the queue scanner
 func (a *App) StopQueueScanner() {
 	Output("stopping...")
-	time.Sleep(time.Second * 1)
 	Exit = true
+	time.Sleep(time.Second * 1)
 	QueueScannerRunning = false
 	QueueLogs = ""
 }
 
 // Restart the queue scanner
 func (a *App) RestartQueueScanner() {
-	Output("restarting...")
+	Output("restarting on next log update...")
 	Exit = true
-	QueueScannerRunning = false
-	a.QueueScanner()
+	RestartNow = true
 }
 
 // Returns the queue logs string
@@ -67,6 +68,10 @@ func PostResults(MapName string, QueueTime int) {
 	message := fmt.Sprintf("[#] Event: %d\n", EventNumber)
 	message += fmt.Sprintf("  🗺️ Map: %s\n", MapName)
 	message += fmt.Sprintf("  🕒 Sec: %d\n\n", QueueTime)
+
+	jsonStr := fmt.Sprintf("{\"map\":\"%s\",\"time\":%d}", MapName, QueueTime)
+	resp, _ := requests.PostJson("http://localhost:4000/api/queue", jsonStr)
+	println(resp.Text())
 
 	Output(message)
 }
@@ -158,6 +163,7 @@ func (a *App) QueueScanner() {
 	}
 
 	// Set defaults
+	Exit = false
 	QueueScannerRunning = true
 	EventNumber = 0
 	QueueLogs = ""
@@ -221,7 +227,9 @@ func (a *App) QueueScanner() {
 
 		// If an exit signal is received, stop the scanner
 		if Exit == true {
-			return
+			QueueScannerRunning = false
+			fmt.Println("exit signal received")
+			break
 		}
 
 		if strings.Contains(line.Text, "GamePrepared") {
@@ -230,5 +238,12 @@ func (a *App) QueueScanner() {
 		if strings.Contains(line.Text, "RaidMode: Online") {
 			PostResults(Map(line.Text), QueueTime)
 		}
+	}
+
+	if RestartNow == true {
+		RestartNow = false
+		a.QueueScanner()
+		Output("restarted")
+		return
 	}
 }
