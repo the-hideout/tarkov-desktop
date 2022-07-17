@@ -21,7 +21,7 @@ This tool works by doing the following:
 
 ## Running 🏃
 
-The binary to run this application is located in the `build/bin` directory
+The binary to run this application is located in the `release/` directory for convenience
 
 ## Development ⚙️
 
