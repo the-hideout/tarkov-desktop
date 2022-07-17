@@ -22,3 +22,11 @@ This tool works by doing the following:
 ## Running 🏃
 
 The binary to run this application is located in the `build/bin` directory
+
+## Development ⚙️
+
+To build and develop this application locally do the following:
+
+- [Install wails](https://wails.io/docs/gettingstarted/installation)
+- Run `wails dev` to start the application
+- Run `wails build` to build the application for production
