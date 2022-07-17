@@ -22,6 +22,7 @@ import (
 var EventNumber int
 var QueueLogs = ""
 var Exit = true
+var QueueScannerRunning = false
 
 // App struct
 type App struct {
@@ -37,6 +38,23 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+// Stop the queue scanner
+func (a *App) StopQueueScanner() {
+	Output("stopping...")
+	time.Sleep(time.Second * 1)
+	Exit = true
+	QueueScannerRunning = false
+	QueueLogs = ""
+}
+
+// Restart the queue scanner
+func (a *App) RestartQueueScanner() {
+	Output("restarting...")
+	Exit = true
+	QueueScannerRunning = false
+	a.QueueScanner()
 }
 
 // Returns the queue logs string
@@ -133,14 +151,16 @@ func LatestLogDir(log_dir string) string {
 }
 
 func (a *App) QueueScanner() {
-	Exit = true
-	Output("restarting...")
-	time.Sleep(time.Second * 1)
-	Exit = false
+	// If the queue scanner is already running, don't start another one
+	if QueueScannerRunning {
+		Output("already running")
+		return
+	}
+
+	// Set defaults
+	QueueScannerRunning = true
 	EventNumber = 0
 	QueueLogs = ""
-
-	//qrterminal.Generate(id, qrterminal.L, os.Stdout)
 
 	// Get the current user's home directory
 	currentUser, err := user.Current()
@@ -158,7 +178,6 @@ func (a *App) QueueScanner() {
 	f, err := os.Open(player_log_file)
 	if err != nil {
 		Output("error opening file Player.log")
-		//os.Exit(1)
 	}
 	r := bufio.NewReader(f)
 	s, e := Readln(r)
@@ -200,6 +219,7 @@ func (a *App) QueueScanner() {
 	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true, Location: &tail.SeekInfo{Offset: 0, Whence: io.SeekEnd}})
 	for line := range t.Lines {
 
+		// If an exit signal is received, stop the scanner
 		if Exit == true {
 			return
 		}

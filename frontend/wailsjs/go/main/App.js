@@ -13,3 +13,11 @@ export function GetQueueLogs() {
 export function QueueScanner() {
   return window['go']['main']['App']['QueueScanner']();
 }
+
+export function RestartQueueScanner() {
+  return window['go']['main']['App']['RestartQueueScanner']();
+}
+
+export function StopQueueScanner() {
+  return window['go']['main']['App']['StopQueueScanner']();
+}

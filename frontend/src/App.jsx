@@ -1,15 +1,21 @@
 import logo from './assets/images/logo-universal.png';
 import React, { useState, useEffect } from "react";
 import './App.css';
-import { QueueScanner, GetQueueLogs, DeviceID } from "../wailsjs/go/main/App";
+import { QueueScanner, RestartQueueScanner, StopQueueScanner, GetQueueLogs, DeviceID } from "../wailsjs/go/main/App";
 import SyntaxHighLighter from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import { QRCodeSVG } from 'qrcode.react';
 
 function App() {
 
-    function queueScanner() {
+    function startQueueScanner() {
         QueueScanner();
+    }
+    function stopQueueScanner() {
+        StopQueueScanner();
+    }
+    function restartQueueScanner() {
+        RestartQueueScanner();
     }
 
     const deviceId = DeviceID();
@@ -31,7 +37,9 @@ function App() {
         <div id="App">
             <img src={logo} id="logo" alt="logo" />
             <div id="input" className="input-box">
-                <button className="btn" onClick={queueScanner}>Start</button>
+                <button className="btn" onClick={startQueueScanner}>Start</button>
+                <button className="btn" onClick={stopQueueScanner}>Stop</button>
+                <button className="btn" onClick={restartQueueScanner}>Restart</button>
                 <button className="btn" onClick={handleClick}>QR</button>
             </div>
 

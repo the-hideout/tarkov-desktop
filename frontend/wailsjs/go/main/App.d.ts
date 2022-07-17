@@ -6,3 +6,7 @@ export function DeviceID():Promise<string>;
 export function GetQueueLogs():Promise<string>;
 
 export function QueueScanner():void;
+
+export function RestartQueueScanner():void;
+
+export function StopQueueScanner():void;
