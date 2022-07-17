@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -39,7 +41,6 @@ func (a *App) startup(ctx context.Context) {
 
 // Returns the queue logs string
 func (a *App) GetQueueLogs() string {
-	fmt.Println(QueueLogs)
 	return fmt.Sprintf(QueueLogs)
 }
 
@@ -117,11 +118,26 @@ func Queue(line string) int {
 	return queue_time
 }
 
+func LatestLogDir(log_dir string) string {
+	files, _ := ioutil.ReadDir(log_dir)
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].ModTime().Before(files[j].ModTime())
+	})
+
+	var latest_log_dir string
+	for _, f := range files {
+		latest_log_dir = log_dir + "\\" + f.Name()
+	}
+
+	return latest_log_dir
+}
+
 func (a *App) QueueScanner() {
 	Exit = true
 	Output("restarting...")
 	time.Sleep(time.Second * 1)
 	Exit = false
+	EventNumber = 0
 	QueueLogs = ""
 
 	//qrterminal.Generate(id, qrterminal.L, os.Stdout)
@@ -159,17 +175,9 @@ func (a *App) QueueScanner() {
 	// Log Directory
 	log_dir := install_path + "\\Logs"
 
-	// Scan the log directory for all log folders
-	files, err := ioutil.ReadDir(log_dir)
-	if err != nil {
-		//log.Fatal(err)
-	}
+	// Scan the log directory for all log folders and grab the latest one
+	latest_log_dir := LatestLogDir(log_dir)
 
-	// Grab the last log folder in the list which will be the latest
-	var latest_log_dir string
-	for _, f := range files {
-		latest_log_dir = log_dir + "\\" + f.Name()
-	}
 	Output("[#] Latest Log Directory: " + latest_log_dir)
 	// Loop through all files in the log directory
 	log_files, err := ioutil.ReadDir(latest_log_dir)
@@ -185,13 +193,11 @@ func (a *App) QueueScanner() {
 		}
 	}
 	Output("[#] Application Log File: " + app_log_file)
-
-	Output("[#] Starting queue-scanner\n")
-	time.Sleep(2 * time.Second)
+	Output("[#] Listening for new events...\n")
 
 	var QueueTime int
 	// Tail the application log file
-	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true})
+	t, _ := tail.TailFile(app_log_file, tail.Config{Follow: true, Poll: true, Location: &tail.SeekInfo{Offset: 0, Whence: io.SeekEnd}})
 	for line := range t.Lines {
 
 		if Exit == true {
@@ -202,7 +208,6 @@ func (a *App) QueueScanner() {
 			QueueTime = Queue(line.Text)
 		}
 		if strings.Contains(line.Text, "RaidMode: Online") {
-			//MapName = Map(line.Text)
 			PostResults(Map(line.Text), QueueTime)
 		}
 	}
