@@ -1,6 +1,6 @@
-# queue-scanner 🔍
+# tarkov-desktop
 
-Escape from Tarkov queue scanner utility
+Escape from Tarkov desktop utility
 
 ## About 💡
 
@@ -18,3 +18,7 @@ This tool works by doing the following:
 - Grab the latest log file folder from your installation directory
 - "Watches" the `application.log` for newly emmited events (like `tail -f` in bash)
 - When the scanner sees relevant events for queue times, it parses the event and submits the data to our API
+
+## Running 🏃
+
+The binary to run this application is located in the `build/bin` directory
